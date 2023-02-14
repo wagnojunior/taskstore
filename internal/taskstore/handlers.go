@@ -2,6 +2,7 @@ package taskstore
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -37,7 +38,9 @@ func (ts *taskServer) taskHandler(w http.ResponseWriter, r *http.Request) {
 
 // `createTaskHandler` handles the creating of new tasks
 func (ts *taskServer) createTaskHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	log.Printf("createTaskHandler at %s\n", r.URL.Path)
+
+	ts.store.CreateTask()
 }
 
 func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request) {
