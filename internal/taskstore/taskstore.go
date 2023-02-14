@@ -70,8 +70,52 @@ func (ts *TaskStore) DeleteTask(id int) error {
 	return nil
 }
 
+// `DeleteAllTasks` deletes all tasks from the taskstore
 func (ts *TaskStore) DeleteAllTasks() error {
 	// Deletes all tasks by creating a new map
 	ts.tasks = make(map[int]Task)
 	return nil
+}
+
+// `GetAllTasks` returns all tasks in the taskstore, in no particular order
+func (ts *TaskStore) GetAllTasks() []Task {
+	// Creates an empty slice of tasks
+	allTasks := make([]Task, 0, len(ts.tasks))
+	for _, t := range ts.tasks {
+		allTasks = append(allTasks, t)
+	}
+
+	return allTasks
+}
+
+// `GetTaskByTag` returns all tasks that match the given tag
+func (ts *TaskStore) GetTaskByTag(tag string) []Task {
+	// Creates an empty slice of tasks
+	taskByTag := make([]Task, 0, len(ts.tasks))
+
+	for _, t := range ts.tasks { // Loops through all tasks in the taskstore
+		for _, tg := range t.Tags { // Loops through all tags in the task
+			if tg == tag {
+				taskByTag = append(taskByTag, t)
+			}
+		}
+	}
+
+	return taskByTag
+}
+
+// `GetTaskByDueDate` returns all tasks that match the diven date
+func (ts *TaskStore) GetTaskByDueDate(year int, month time.Month, day int) []Task {
+	// Creates an empty slice of tasks
+	taskByDate := make([]Task, 0, len(ts.tasks))
+
+	for _, t := range ts.tasks { // Loops through all tasks in the taskstore
+		// Gets the year, month, dar for task `t`
+		y, m, d := t.Due.Date()
+		if year == y && month == m && day == d {
+			taskByDate = append(taskByDate, t)
+		}
+	}
+
+	return taskByDate
 }
