@@ -1,12 +1,13 @@
 package taskstore
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 )
 
-// `taskServer` is a constructor for the serer type. It wraps a `TaskStore`
+// `taskServer` is a constructor for the server type. It wraps a `TaskStore`
 type taskServer struct {
 	store *TaskStore
 }
@@ -18,7 +19,7 @@ func NewTaskServer() *taskServer {
 	}
 }
 
-func (ts *taskServer) taskHandler(w http.ResponseWriter, r *http.Request) {
+func (ts *taskServer) TaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Checks if the request has an ID associated with if
 	if r.URL.Path == "/task/" { // No ID associated
 		// Checks the requet type
@@ -36,11 +37,22 @@ func (ts *taskServer) taskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// `createTaskHandler` handles the creating of new tasks
+// `createTaskHandler` handles the creation of new tasks
 func (ts *taskServer) createTaskHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("createTaskHandler at %s\n", r.URL.Path)
 
-	ts.store.CreateTask()
+	// Creates a new decoder and disallow unknowm fields
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	// Decodes the JSON data to Go struct
+	var task Task
+	err := dec.Decode(&task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 }
 
 func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request) {
