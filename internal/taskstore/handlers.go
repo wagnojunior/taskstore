@@ -53,6 +53,17 @@ func (ts *taskServer) createTaskHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Creates a new task and converts it back to JSON
+	_ = ts.store.CreateTask(task.Text, task.Tags, task.Due)
+	json, err := json.Marshal(task.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Writes to the http response writer
+	w.Write(json)
+
 }
 
 func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request) {
