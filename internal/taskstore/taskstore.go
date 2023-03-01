@@ -41,8 +41,8 @@ func (ts *TaskStore) CreateTask(text string, tags []string, due time.Time) int {
 	// Adds `task` to the taskstore
 	ts.tasks[ts.nextID] = task
 
-	// Increments `nextID` of the taskstore so the next task won't have the same ID
-	// as the previous
+	// Increments `nextID` of the taskstore so the next task won't have the
+	// same ID as the previous
 	ts.nextID++
 
 	return task.ID
