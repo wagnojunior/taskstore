@@ -1,3 +1,6 @@
+// This project is largely based on Eli Bendersky's series `REST Servers in Go`.
+// https://eli.thegreenplace.net/2021/rest-servers-in-go-part-1-standard-library/
+
 package main
 
 import (
