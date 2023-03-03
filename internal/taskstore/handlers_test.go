@@ -45,5 +45,8 @@ func TestCreateTaskHandler(t *testing.T) {
 	if status != http.StatusOK {
 		t.Errorf("handler returned the wrong status code: got %v want %v", status, http.StatusOK)
 	}
+}
 
+func TestGetAllTasksHandler(t *testing.T) {
+	// TODO
 }

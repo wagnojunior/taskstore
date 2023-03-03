@@ -57,6 +57,17 @@ func (ts *TaskStore) GetTask(id int) (Task, error) {
 	return task, nil
 }
 
+// `GetAllTasks` returns all tasks in the taskstore, in no particular order
+func (ts *TaskStore) GetAllTasks() []Task {
+	// Creates an empty slice of tasks
+	allTasks := make([]Task, 0, len(ts.tasks))
+	for _, t := range ts.tasks {
+		allTasks = append(allTasks, t)
+	}
+
+	return allTasks
+}
+
 // `DeleteTask` deletes a task from the taskstore by id. If the id does not exists, returns an
 // error.
 func (ts *TaskStore) DeleteTask(id int) error {
@@ -75,17 +86,6 @@ func (ts *TaskStore) DeleteAllTasks() error {
 	// Deletes all tasks by creating a new map
 	ts.tasks = make(map[int]Task)
 	return nil
-}
-
-// `GetAllTasks` returns all tasks in the taskstore, in no particular order
-func (ts *TaskStore) GetAllTasks() []Task {
-	// Creates an empty slice of tasks
-	allTasks := make([]Task, 0, len(ts.tasks))
-	for _, t := range ts.tasks {
-		allTasks = append(allTasks, t)
-	}
-
-	return allTasks
 }
 
 // `GetTaskByTag` returns all tasks that match the given tag

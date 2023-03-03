@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 // `taskServer` is a constructor for the server type. It wraps a `TaskStore`
@@ -62,14 +63,107 @@ func (ts *taskServer) createTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Writes to the http response writer
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)
 
 }
 
 func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	log.Printf("getAllTasksHandler at %s\n", r.URL.Path)
+
+	// Gets all the tasks and marshals it to JSON
+	allTasks := ts.store.GetAllTasks()
+	json, err := json.Marshal(allTasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Writes to the http response writer
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+}
+
+func (ts *taskServer) getTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
+	log.Printf("getTaskHandler at %s\n", r.URL.Path)
+
+	// Gets the tasks by ID and marshals it to JSON
+	task, err := ts.store.GetTask(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	json, err := json.Marshal(task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Writes to the http response writer
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+}
+
+func (ts *taskServer) deleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
+	log.Printf("deleteTaskHandler at %s\n", r.URL.Path)
+
+	// Deletes the task by ID
+	err := ts.store.DeleteTask(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (ts *taskServer) deleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	log.Printf("deleteAllTasksHandler at %s\n", r.URL.Path)
+
+	// Deletes all tasks
+	err := ts.store.DeleteAllTasks()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("getTaskByTagHandler at %s\n", r.URL.Path)
+
+	// Checks if requet method is a GET
+	if r.Method != http.MethodGet {
+		http.Error(
+			w,
+			fmt.Sprintf("expected method GET /tag/<tag>, got %s", r.Method),
+			http.StatusMethodNotAllowed)
+	}
+
+	// Get the task by tag and marshal it into JSON
+	tasks := ts.store.GetTaskByTag(tag)
+	json, err := json.Marshal(tasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Writes to the http response writer
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+}
+
+func (ts *taskServer) getTaskByDueDateHandler(w http.ResponseWriter, r *http.Request, year int,
+	month time.Month, day int) {
+
+	log.Printf("getTaskByDueDateHandler at %s\n", r.URL.Path)
+
+	// Get the task by date and marshal it into JSON
+	tasks := ts.store.GetTaskByDueDate(year, month, day)
+	json, err := json.Marshal(tasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Writes to the http response writer
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
 }
