@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -136,6 +137,18 @@ func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request
 			fmt.Sprintf("expected method GET /tag/<tag>, got %s", r.Method),
 			http.StatusMethodNotAllowed)
 	}
+
+	// Get the `tag` from the URL
+	path := strings.Trim(r.URL.Path, "/")
+	subPath := strings.Split(path, "/")
+	println(path, subPath)
+
+	// Check if there are at least one tag in the path. If length of `subPath`
+	// is less than 2, then there are no tags in the path
+	if len(subPath) < 2 {
+		http.Error(w, "expected a path with a least one tag, not none", http.StatusBadRequest)
+	}
+	tag := subPath[1]
 
 	// Get the task by tag and marshal it into JSON
 	tasks := ts.store.GetTaskByTag(tag)
