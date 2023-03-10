@@ -2,6 +2,7 @@ package taskstore
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -118,4 +119,24 @@ func (ts *TaskStore) GetTaskByDueDate(year int, month time.Month, day int) []Tas
 	}
 
 	return taskByDate
+}
+
+// compareTask compares two tasks and returns `false` if different and `true` if same
+func compareTask(t1, t2 Task) bool {
+	if t1.ID != t2.ID {
+		return false
+	}
+	if t1.Text != t2.Text {
+		return false
+	}
+	// `.Round(0)` is used to remove the monotonic clock
+	if t1.Due.Round(0) != t2.Due.Round(0) {
+		return false
+	}
+	// `.reflectDeepEqual` compares slices of string
+	if !reflect.DeepEqual(t1.Tags, t2.Tags) {
+		return false
+	}
+
+	return true
 }
