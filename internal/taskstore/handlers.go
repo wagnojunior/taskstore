@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -69,6 +70,7 @@ func (ts *taskServer) createTaskHandler(w http.ResponseWriter, r *http.Request) 
 
 }
 
+// getAllTasksHandler handles the getting all tasks
 func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getAllTasksHandler at %s\n", r.URL.Path)
 
@@ -85,6 +87,7 @@ func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request)
 	w.Write(json)
 }
 
+// getTaskHandler handles the getting of a task
 func (ts *taskServer) getTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	log.Printf("getTaskHandler at %s\n", r.URL.Path)
 
@@ -105,6 +108,7 @@ func (ts *taskServer) getTaskHandler(w http.ResponseWriter, r *http.Request, id 
 	w.Write(json)
 }
 
+// deleteTaskHandler handles the deleting of a task
 func (ts *taskServer) deleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	log.Printf("deleteTaskHandler at %s\n", r.URL.Path)
 
@@ -116,6 +120,7 @@ func (ts *taskServer) deleteTaskHandler(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
+// deleteAllTasksHandler handles the deleting of all tasks
 func (ts *taskServer) deleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("deleteAllTasksHandler at %s\n", r.URL.Path)
 
@@ -127,6 +132,7 @@ func (ts *taskServer) deleteAllTasksHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// getTaskByTagHandler handles the getting of a task by tag
 func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getTaskByTagHandler at %s\n", r.URL.Path)
 
@@ -146,7 +152,7 @@ func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request
 	// Check if there are at least one tag in the path. If length of `subPath`
 	// is less than 2, then there are no tags in the path
 	if len(subPath) < 2 {
-		http.Error(w, "expected a path with a least one tag, not none", http.StatusBadRequest)
+		http.Error(w, "expected a path with a least one tag, got none", http.StatusBadRequest)
 	}
 	tag := subPath[1]
 
@@ -163,13 +169,50 @@ func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request
 	w.Write(json)
 }
 
-func (ts *taskServer) getTaskByDueDateHandler(w http.ResponseWriter, r *http.Request, year int,
-	month time.Month, day int) {
-
+// getTaskByDueDateHandler handles the getting of a task by due date
+func (ts *taskServer) getTaskByDueDateHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getTaskByDueDateHandler at %s\n", r.URL.Path)
 
+	// Checks if requet method is a GET
+	if r.Method != http.MethodGet {
+		http.Error(
+			w,
+			fmt.Sprintf("expected method GET /due/<year>/<month>/<day>, got %s", r.Method),
+			http.StatusMethodNotAllowed)
+	}
+
+	// Gets the `tag` from the URL
+	path := strings.Trim(r.URL.Path, "/")
+	subPath := strings.Split(path, "/")
+
+	// Checks if there are at least one tag in the path. If length of `subPath`
+	// is less than 4, then there are missing fields
+	if len(subPath) < 4 {
+		http.Error(w, "expected a path with format /due/<year>/<month>/<day>",
+			http.StatusBadRequest)
+	}
+
+	// Checks the validity of each field in the path
+	year, err := strconv.Atoi(subPath[1])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	month, err := strconv.Atoi(subPath[2])
+	if err != nil || month < int(time.January) || month > int(time.December) {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	day, err := strconv.Atoi(subPath[3])
+	if err != nil || day > daysIn(time.Month(month), year) {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// Get the task by date and marshal it into JSON
-	tasks := ts.store.GetTaskByDueDate(year, month, day)
+	tasks := ts.store.GetTaskByDueDate(year, time.Month(month), day)
 	json, err := json.Marshal(tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -179,4 +222,9 @@ func (ts *taskServer) getTaskByDueDateHandler(w http.ResponseWriter, r *http.Req
 	// Writes to the http response writer
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)
+}
+
+// daysIn calculates and returns how many days in a month for a given year
+func daysIn(m time.Month, year int) int {
+	return time.Date(year, m+1, 0, 0, 0, 0, 0, time.UTC).Day()
 }
