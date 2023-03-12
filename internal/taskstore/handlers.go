@@ -22,9 +22,13 @@ func NewTaskServer() *taskServer {
 	}
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+// TASK HANDLERS
+// /////////////////////////////////////////////////////////////////////////////
+
 func (ts *taskServer) TaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Checks if the request has an ID associated with if
-	if r.URL.Path == "/task/" { // No ID associated
+	if r.URL.Path == "/task/" { // Request without an ID
 		// Checks the requet type
 		if r.Method == http.MethodPost { // Creates a new task
 			ts.createTaskHandler(w, r)
@@ -33,8 +37,31 @@ func (ts *taskServer) TaskHandler(w http.ResponseWriter, r *http.Request) {
 		} else if r.Method == http.MethodDelete { // Deletes all tasks
 			ts.deleteAllTasksHandler(w, r)
 		} else { //
-			http.Error(w, fmt.Sprintf("expect method POST, GET, DELETE but got %v", r.Method),
-				http.StatusMethodNotAllowed)
+			http.Error(w, fmt.Sprintf("expect method POST, GET, DELETE but got %v", r.Method), http.StatusMethodNotAllowed)
+			return
+		}
+	} else { // Request with an ID
+		path := strings.Trim(r.URL.Path, "/")
+		subPath := strings.Split(path, "/")
+		if len(subPath) < 2 {
+			http.Error(w, "expected /task/<id> in task handler",
+				http.StatusBadRequest)
+		}
+
+		// Gets the ID
+		id, err := strconv.Atoi(subPath[1])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Checks the method
+		if r.Method == http.MethodDelete { // Deletes a task
+			ts.deleteTaskHandler(w, r, id)
+		} else if r.Method == http.MethodGet { // Gets a task
+			ts.getTaskHandler(w, r, id)
+		} else {
+			http.Error(w, fmt.Sprintf("expect method POST, GET, DELETE but got %v", r.Method), http.StatusMethodNotAllowed)
 			return
 		}
 	}
@@ -133,8 +160,8 @@ func (ts *taskServer) deleteAllTasksHandler(w http.ResponseWriter, r *http.Reque
 }
 
 // getTaskByTagHandler handles the getting of a task by tag
-func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("getTaskByTagHandler at %s\n", r.URL.Path)
+func (ts *taskServer) TagHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("TagHandler at %s\n", r.URL.Path)
 
 	// Checks if requet method is a GET
 	if r.Method != http.MethodGet {
@@ -170,7 +197,7 @@ func (ts *taskServer) getTaskByTagHandler(w http.ResponseWriter, r *http.Request
 }
 
 // getTaskByDueDateHandler handles the getting of a task by due date
-func (ts *taskServer) getTaskByDueDateHandler(w http.ResponseWriter, r *http.Request) {
+func (ts *taskServer) DueHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getTaskByDueDateHandler at %s\n", r.URL.Path)
 
 	// Checks if requet method is a GET
