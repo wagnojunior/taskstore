@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/wagnojunior/taskstore/internal/utils"
 )
 
 // `taskServer` is a constructor for the server type. It wraps a `TaskStore`
@@ -85,15 +87,7 @@ func (ts *taskServer) createTaskHandler(w http.ResponseWriter, r *http.Request) 
 
 	// Creates a new task and converts it back to JSON
 	_ = ts.store.CreateTask(task.Text, task.Tags, task.Due)
-	json, err := json.Marshal(task.ID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Writes to the http response writer
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	utils.RenderJSON(w, task.ID)
 
 }
 
@@ -103,15 +97,7 @@ func (ts *taskServer) getAllTasksHandler(w http.ResponseWriter, r *http.Request)
 
 	// Gets all the tasks and marshals it to JSON
 	allTasks := ts.store.GetAllTasks()
-	json, err := json.Marshal(allTasks)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Writes to the http response writer
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	utils.RenderJSON(w, allTasks)
 }
 
 // getTaskHandler handles the getting of a task
@@ -124,15 +110,7 @@ func (ts *taskServer) getTaskHandler(w http.ResponseWriter, r *http.Request, id 
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	json, err := json.Marshal(task)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Writes to the http response writer
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	utils.RenderJSON(w, task)
 }
 
 // deleteTaskHandler handles the deleting of a task
@@ -159,7 +137,11 @@ func (ts *taskServer) deleteAllTasksHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// getTaskByTagHandler handles the getting of a task by tag
+// /////////////////////////////////////////////////////////////////////////////////////////////////
+// TAG HANDLER
+// /////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TagHandler handles the getting of a task by tag
 func (ts *taskServer) TagHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("TagHandler at %s\n", r.URL.Path)
 
@@ -185,18 +167,14 @@ func (ts *taskServer) TagHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the task by tag and marshal it into JSON
 	tasks := ts.store.GetTaskByTag(tag)
-	json, err := json.Marshal(tasks)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Writes to the http response writer
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	utils.RenderJSON(w, tasks)
 }
 
-// getTaskByDueDateHandler handles the getting of a task by due date
+// /////////////////////////////////////////////////////////////////////////////////////////////////
+// TAG HANDLER
+// /////////////////////////////////////////////////////////////////////////////////////////////////
+
+// DueHandler handles the getting of a task by due date
 func (ts *taskServer) DueHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getTaskByDueDateHandler at %s\n", r.URL.Path)
 
@@ -233,25 +211,12 @@ func (ts *taskServer) DueHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	day, err := strconv.Atoi(subPath[3])
-	if err != nil || day > daysIn(time.Month(month), year) {
+	if err != nil || day > utils.DaysIn(time.Month(month), year) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Get the task by date and marshal it into JSON
 	tasks := ts.store.GetTaskByDueDate(year, time.Month(month), day)
-	json, err := json.Marshal(tasks)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Writes to the http response writer
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
-}
-
-// daysIn calculates and returns how many days in a month for a given year
-func daysIn(m time.Month, year int) int {
-	return time.Date(year, m+1, 0, 0, 0, 0, 0, time.UTC).Day()
+	utils.RenderJSON(w, tasks)
 }
