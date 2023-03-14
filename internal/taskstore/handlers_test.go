@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func TestCreateTaskHandler(t *testing.T) {
@@ -36,7 +38,7 @@ func TestCreateTaskHandler(t *testing.T) {
 	ts := NewTaskServer()
 
 	// Serves HTTP
-	handler := http.HandlerFunc(ts.TaskHandler)
+	handler := http.HandlerFunc(ts.CreateTaskHandler)
 	handler.ServeHTTP(w, r)
 
 	// Checks the HTTP reponse status code
@@ -73,7 +75,7 @@ func TestGetAllTasksHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Serves HTTP
-	handler := http.HandlerFunc(ts.TaskHandler)
+	handler := http.HandlerFunc(ts.GetAllTasksHandler)
 	handler.ServeHTTP(w, r)
 
 	// Gets the task from the response writer and unmarshal it into a struct
@@ -102,17 +104,23 @@ func TestGetTaskHandler(t *testing.T) {
 	_ = ts.store.CreateTask(task.Text, task.Tags, task.Due)
 
 	// Creates a GET request to the `/task/0` directory
-	r, err := http.NewRequest("GET", "/task/0", nil)
+	r, err := http.NewRequest("GET", "/task/0/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Set a mock `mux.Vars` for testing
+	vars := map[string]string{
+		"id": "0",
+	}
+	r = mux.SetURLVars(r, vars)
 
 	// Creates a ResponseRecorder, which is an implementation of
 	// `http.ResponseWriter`
 	w := httptest.NewRecorder()
 
 	// Serves HTTP
-	handler := http.HandlerFunc(ts.TaskHandler)
+	handler := http.HandlerFunc(ts.GetTaskHandler)
 	handler.ServeHTTP(w, r)
 
 	// Gets the task from the response writer and unmarshal it into a struct
@@ -144,12 +152,18 @@ func TestGetTaskByTagHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Set a mock `mux.Vars` for testing
+	vars := map[string]string{
+		"tag": "tag_1",
+	}
+	r = mux.SetURLVars(r, vars)
+
 	// Creates a ResponseRecorder, which is an implementation of
 	// `http.ResponseWriter`
 	w := httptest.NewRecorder()
 
 	// Serves HTTP
-	handler := http.HandlerFunc(ts.TagHandler)
+	handler := http.HandlerFunc(ts.GetTaskByTagHandler)
 	handler.ServeHTTP(w, r)
 
 	// Gets the task from the response writer and unmarshal it into a struct
@@ -180,12 +194,20 @@ func TestGetTaskByDueDateHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Set a mock `mux.Vars` for testing
+	vars := map[string]string{
+		"year":  "2023",
+		"month": "9",
+		"day":   "5",
+	}
+	r = mux.SetURLVars(r, vars)
+
 	// Creates a ResponseRecorder, which is an implementation of
 	// `http.ResponseWriter`
 	w := httptest.NewRecorder()
 
 	// Serves HTTP
-	handler := http.HandlerFunc(ts.DueHandler)
+	handler := http.HandlerFunc(ts.GetTaskByDueHandler)
 	handler.ServeHTTP(w, r)
 
 	// Gets the task from the response writer and unmarshal it into a struct
