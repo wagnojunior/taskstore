@@ -7,8 +7,8 @@ import (
 )
 
 // daysIn calculates and returns how many days in a month for a given year
-func DaysIn(m time.Month, year int) int {
-	return time.Date(year, m+1, 0, 0, 0, 0, 0, time.UTC).Day()
+func DaysIn(month, year int) int {
+	return time.Date(year, time.Month(month+1), 0, 0, 0, 0, 0, time.UTC).Day()
 }
 
 // renderJSON renders `v` as a JSON and writes it in a response writer
