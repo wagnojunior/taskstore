@@ -31,5 +31,5 @@ func main() {
 		Methods(http.MethodGet)
 
 	fmt.Println("Starting server at port :3030...")
-	log.Fatal(http.ListenAndServe("localhost:3030", r))
+	log.Fatal(http.ListenAndServe("localhost:3030", taskstore.LoggingMiddleware(r.ServeHTTP)))
 }
