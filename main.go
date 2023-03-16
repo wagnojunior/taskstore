@@ -30,6 +30,9 @@ func main() {
 	r.HandleFunc("/due/{year:[0-9]+}/{month:[0-9]+}/{day:[0-9]}/", server.GetTaskByDueHandler).
 		Methods(http.MethodGet)
 
+	// Defines middleware
+	r.Use(taskstore.LoggingMiddleware)
+
 	fmt.Println("Starting server at port :3030...")
-	log.Fatal(http.ListenAndServe("localhost:3030", taskstore.LoggingMiddleware(r.ServeHTTP)))
+	log.Fatal(http.ListenAndServe("localhost:3030", r))
 }
