@@ -7,12 +7,62 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/wagnojunior/taskstore/internal/taskstore"
 )
 
+// `appConfig` configures all env variables required for this application to run
+type appConfig struct {
+	PSQL   taskstore.PostgresConfig
+	Server struct {
+		Address string
+	}
+}
+
+// `loadEnvVar` loads the required environment variables
+func loadEnvVar() (*appConfig, error) {
+	var appCfg *appConfig
+
+	err := godotenv.Load()
+	if err != nil {
+		return appCfg, err
+	}
+
+	// /////////////////////////////////////////////////////////////////////////
+	// DATABASE
+	// /////////////////////////////////////////////////////////////////////////
+	appCfg.PSQL.Host = os.Getenv("DB_HOST")
+	appCfg.PSQL.Port = os.Getenv("DB_PORT")
+	appCfg.PSQL.User = os.Getenv("DB_USER")
+	appCfg.PSQL.Password = os.Getenv("DB_PASSWORD")
+	appCfg.PSQL.Database = os.Getenv("DB_DATABASE")
+	appCfg.PSQL.SSLMode = os.Getenv("DB_SSLMODE")
+
+	// /////////////////////////////////////////////////////////////////////////
+	// SERVER
+	// /////////////////////////////////////////////////////////////////////////
+	appCfg.Server.Address = os.Getenv("SERVER_ADDRESS")
+
+	return appCfg, nil
+}
+
 func main() {
+	// Initiates the appConfig
+	appCfg, err := loadEnvVar()
+	if err != nil {
+		panic(err)
+	}
+
+	// Opens a connection to the databrase
+	db, err := taskstore.Open(appCfg.PSQL)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
 	// Starts Gorilla mux
 	r := mux.NewRouter()
 	r.StrictSlash(true)
