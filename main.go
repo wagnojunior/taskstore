@@ -23,8 +23,8 @@ type appConfig struct {
 }
 
 // `loadEnvVar` loads the required environment variables
-func loadEnvVar() (*appConfig, error) {
-	var appCfg *appConfig
+func loadEnvVar() (appConfig, error) {
+	var appCfg appConfig
 
 	err := godotenv.Load()
 	if err != nil {
