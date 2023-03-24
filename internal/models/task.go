@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/wagnojunior/taskstore/internal/utils"
 )
 
 // `Task` defines the structure of a task.
@@ -49,7 +51,7 @@ func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 		StoreID: storeID,
 		ID:      id,
 	}
-	var auxTags, auxDue string
+	var auxTags string
 
 	row := ts.DB.QueryRow(`
 		SELECT text, tags, due
@@ -58,13 +60,13 @@ func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 		AND id = ($2)`,
 		storeID, id)
 
-	err := row.Scan(&task.Text, &auxTags, &auxDue)
+	err := row.Scan(&task.Text, &auxTags, &task.Due)
 	if err != nil {
 		return nil, fmt.Errorf("get task by ID: %w", err)
 	}
 
-	// TODO: convert auxTags to []string
-	// TODO: convert auxDue to time.Time
+	// Converts `auxTags`  to a slice of strings, and adds it to `task`
+	task.Tags = utils.StrToSlice(auxTags)
 
 	log.Println("Task retrieved by ID!")
 	return &task, nil
