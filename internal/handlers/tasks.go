@@ -35,15 +35,6 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 
 // `GetByID` handles GET requests
 func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
-	// var task models.Task
-
-	// b, err := io.ReadAll(r.Body)
-	// json.Unmarshal(b, &task)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
-
 	// Gets a `map[string]string` associated with the http resquest `r`,
 	reqData := mux.Vars(r)
 	storeID, err := strconv.Atoi(reqData["store_id"])
