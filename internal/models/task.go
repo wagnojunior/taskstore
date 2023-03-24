@@ -4,16 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 )
 
 // `Task` defines the structure of a task.
 type Task struct {
-	StoreID int       `json:"store_id"`
-	ID      int       `json:"id"`
-	Text    string    `json:"text"`
-	Tags    []string  `json:"tags"`
-	Due     time.Time `json:"due"`
+	StoreID int      `json:"store_id"`
+	ID      int      `json:"id"`
+	Text    string   `json:"text"`
+	Tags    []string `json:"tags"`
+	Due     string   `json:"due"`
 }
 
 // `TaskService` defines the connection to the database
@@ -22,7 +21,7 @@ type TaskService struct {
 }
 
 // `Create` creates a new task, inserts it into the database, and returns it.
-func (ts *TaskService) Create(storeID int, text string, tags []string, due time.Time) (*Task, error) {
+func (ts *TaskService) Create(storeID int, text string, tags []string, due string) (*Task, error) {
 	task := Task{
 		StoreID: storeID,
 		Text:    text,

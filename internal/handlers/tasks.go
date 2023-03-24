@@ -25,9 +25,6 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: parse the time to a more friendly formar
-	// const shortForm = "2006-Jan-02"
-
 	_, err = t.TaskService.Create(task.StoreID, task.Text, task.Tags,
 		task.Due)
 	if err != nil {
