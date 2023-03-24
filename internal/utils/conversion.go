@@ -24,13 +24,9 @@ func RenderJSON(w http.ResponseWriter, v any) {
 	w.Write(json)
 }
 
-// `StrToSlice` slices `str` into all substrings separated by `,` and returns
-// slice of the substrings between those separators
+// `StrToSlice` removes the first and last characters of `str`, slices it
+// into all substrings separered by `,`, and returns the slice of substrings
 func StrToSlice(str string) []string {
-	return strings.Split(str, ",")
-}
-
-func StrToTime(str string) time.Time {
-	// TODO: implement
-	return time.Now()
+	aux := str[1 : len(str)-1]
+	return strings.Split(aux, ",")
 }
