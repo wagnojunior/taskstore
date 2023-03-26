@@ -51,6 +51,11 @@ func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 		StoreID: storeID,
 		ID:      id,
 	}
+	// `Task.Tags` is a slice of string, however it is saved as a
+	// comma-separated string in the database. Therefore, when querying from
+	// the database there is a type mismatch: string->[]string. `auxTags`
+	// receives the data from the database for sebsequent conversion
+	// string->[]string
 	var auxTags string
 
 	row := ts.DB.QueryRow(`
@@ -70,4 +75,34 @@ func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 
 	log.Println("Task retrieved by ID!")
 	return &task, nil
+}
+
+func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
+	var size int
+
+	row := ts.DB.QueryRow(`
+		SELECT COUNT *
+		FROM tasks
+		WHERE store_id = ($1)`,
+		storeID)
+
+	err := row.Scan(&size)
+	if err != nil {
+		return nil, fmt.Errorf("get task by ID: %w", err)
+	}
+
+	tasks := make([]Task, 0, size)
+
+	row = ts.DB.QueryRow(`
+		SELECT *
+		FROM tasks
+		WHERE store_id = ($1)`,
+		storeID)
+
+	err = row.Scan(&tasks)
+	if err != nil {
+		return nil, fmt.Errorf("get task by ID: %w", err)
+	}
+
+	return &tasks, nil
 }
