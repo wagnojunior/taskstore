@@ -35,7 +35,7 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 
 // `GetByID` handles GET requests
 func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
-	// Gets a `map[string]string` associated with the http resquest `r`,
+	// Gets a `map[string]string` associated with the http resquest `r`
 	reqData := mux.Vars(r)
 	storeID, err := strconv.Atoi(reqData["store_id"])
 	id, err := strconv.Atoi(reqData["id"])
@@ -45,6 +45,22 @@ func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = t.TaskService.GetByID(storeID, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
+	// Gets a `map[string]string` associated with the http request `r`
+	reqData := mux.Vars(r)
+	storeID, err := strconv.Atoi(reqData["store_id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = t.TaskService.GetAll(storeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

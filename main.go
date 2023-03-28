@@ -88,6 +88,7 @@ func main() {
 	r.HandleFunc("/store", storeHandler.Create).Methods(http.MethodPost)
 	r.HandleFunc("/task", taskHanler.Create).Methods(http.MethodPost)
 	r.HandleFunc("/task/{store_id:[0-9]+}/{id:[0-9]}", taskHanler.GetByID).Methods(http.MethodGet)
+	r.HandleFunc("/task/{store_id:[0-9]}", taskHanler.GetAll)
 
 	fmt.Println("Starting server at port :3030...")
 	log.Fatal(http.ListenAndServe("localhost:3030",
