@@ -82,7 +82,7 @@ func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
 	var size int
 
 	row := ts.DB.QueryRow(`
-		SELECT COUNT *
+		SELECT COUNT (*)
 		FROM tasks
 		WHERE store_id = ($1)`,
 		storeID)
