@@ -93,14 +93,38 @@ func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
 	}
 
 	tasks := make([]Task, 0, size)
+	// `Task.Tags` is a slice of string, however it is saved as a
+	// comma-separated string in the database. Therefore, when querying from
+	// the database there is a type mismatch: string->[]string. `auxTags`
+	// receives the data from the database for sebsequent conversion
+	// string->[]string
+	var auxTags string
 
-	row = ts.DB.QueryRow(`
+	rows, err := ts.DB.Query(`
 		SELECT *
 		FROM tasks
 		WHERE store_id = ($1)`,
 		storeID)
+	if err != nil {
+		return nil, fmt.Errorf("get task by ID: %w", err)
+	}
+	defer rows.Close()
 
-	err = row.Scan(&tasks)
+	for rows.Next() {
+		var task Task
+
+		err = rows.Scan(&task.ID, &task.Text, &auxTags, &task.Due,
+			&task.StoreID)
+		if err != nil {
+			return nil, fmt.Errorf("get task by ID: %w", err)
+		}
+
+		// Converts `auxTags`  to a slice of strings, and adds it to `task`
+		task.Tags = utils.StrToSlice(auxTags)
+
+		tasks = append(tasks, task)
+	}
+	err = rows.Err()
 	if err != nil {
 		return nil, fmt.Errorf("get task by ID: %w", err)
 	}
