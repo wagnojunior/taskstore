@@ -9,6 +9,9 @@ curl -d '{"store_id":1, "text":"test_task_1", "tags":["test_tag_1"], "due":"2021
 ## GET request to get a task by ID
 curl -v http://localhost:3030/task/1/1
 
+## GET request to get all tasks from a store
+curl -v http://localhost:3030/task/1
+
 
 # Goose commands
 
