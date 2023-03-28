@@ -77,6 +77,7 @@ func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 	return &task, nil
 }
 
+// `GetAll` gets all tasks from a determined store
 func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
 	var size int
 
