@@ -15,7 +15,7 @@ type Tasks struct {
 	TaskService *models.TaskService
 }
 
-// `Create` handles POST requests
+// `Create` handles POST requests to create a task in a given store
 func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 
@@ -36,7 +36,7 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 	utils.RenderJSON(w, newTask)
 }
 
-// `GetByID` handles GET requests
+// `GetByID` handles GET requests retrieve a task by ID from a given store
 func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 	// Gets a `map[string]string` associated with the http resquest `r`
 	reqData := mux.Vars(r)
@@ -56,6 +56,7 @@ func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 	utils.RenderJSON(w, gotTask)
 }
 
+// `GetAll` handles GET requests to retrieve all tasks from a given store
 func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
 	// Gets a `map[string]string` associated with the http request `r`
 	reqData := mux.Vars(r)
