@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/wagnojunior/taskstore/internal/models"
+	"github.com/wagnojunior/taskstore/internal/utils"
 )
 
 type Tasks struct {
@@ -25,12 +26,14 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = t.TaskService.Create(task.StoreID, task.Text, task.Tags,
+	newTask, err := t.TaskService.Create(task.StoreID, task.Text, task.Tags,
 		task.Due)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	utils.RenderJSON(w, newTask)
 }
 
 // `GetByID` handles GET requests
@@ -44,11 +47,13 @@ func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = t.TaskService.GetByID(storeID, id)
+	gotTask, err := t.TaskService.GetByID(storeID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	utils.RenderJSON(w, gotTask)
 }
 
 func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -60,9 +65,11 @@ func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = t.TaskService.GetAll(storeID)
+	allTasks, err := t.TaskService.GetAll(storeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	utils.RenderJSON(w, allTasks)
 }
