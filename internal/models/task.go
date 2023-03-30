@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -45,7 +46,7 @@ func (ts *TaskService) Create(storeID int, text string, tags []string, due strin
 	return &task, nil
 }
 
-// `GetByID` gets a task from the given store by ID
+// `GetByID` gets a task by ID from the given store
 func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 	task := Task{
 		StoreID: storeID,
@@ -70,7 +71,7 @@ func (ts *TaskService) GetByID(storeID, id int) (*Task, error) {
 		return nil, fmt.Errorf("get task by ID: %w", err)
 	}
 
-	// Converts `auxTags`  to a slice of strings, and adds it to `task`
+	// Converts `auxTags` to a slice of strings, and adds it to `task`
 	task.Tags = utils.StrToSlice(auxTags)
 
 	log.Println("Task retrieved by ID!")
@@ -121,7 +122,6 @@ func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
 
 		// Converts `auxTags`  to a slice of strings, and adds it to `task`
 		task.Tags = utils.StrToSlice(auxTags)
-
 		tasks = append(tasks, task)
 	}
 	err = rows.Err()
@@ -129,5 +129,30 @@ func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
 		return nil, fmt.Errorf("get task by ID: %w", err)
 	}
 
+	log.Println("All tasks retrieved!")
 	return &tasks, nil
+}
+
+// `DeleteByID` deletes a task by ID from the giver store
+func (ts *TaskService) DeleteByID(storeID, id int) error {
+	var delID int
+
+	row := ts.DB.QueryRow(`
+		DELETE FROM tasks
+		WHERE store_id = ($1)
+		AND id = ($2)
+		RETURNING id`,
+		storeID, id)
+
+	err := row.Scan(&delID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("task does not exist: %w", err)
+		} else {
+			return fmt.Errorf("delte task by ID: %w", err)
+		}
+	}
+
+	log.Println("Task deleted by ID!")
+	return nil
 }

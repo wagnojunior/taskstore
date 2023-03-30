@@ -74,3 +74,21 @@ func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	utils.RenderJSON(w, allTasks)
 }
+
+// `DeleteByID` handles POST requests to delete a task by ID from a given store
+func (t Tasks) DeleteByID(w http.ResponseWriter, r *http.Request) {
+	// Gets a `map[string]string associated with the http request `r`
+	reqData := mux.Vars(r)
+	storeID, err := strconv.Atoi(reqData["store_id"])
+	id, err := strconv.Atoi(reqData["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = t.TaskService.DeleteByID(storeID, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
