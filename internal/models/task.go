@@ -133,7 +133,7 @@ func (ts *TaskService) GetAll(storeID int) (*[]Task, error) {
 	return &tasks, nil
 }
 
-// `DeleteByID` deletes a task by ID from the giver store
+// `DeleteByID` deletes a task by ID from the given store
 func (ts *TaskService) DeleteByID(storeID, id int) error {
 	var delID int
 
@@ -149,10 +149,44 @@ func (ts *TaskService) DeleteByID(storeID, id int) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("task does not exist: %w", err)
 		} else {
-			return fmt.Errorf("delte task by ID: %w", err)
+			return fmt.Errorf("delete task by ID: %w", err)
 		}
 	}
 
 	log.Println("Task deleted by ID!")
 	return nil
+}
+
+// `DeleteAll` deletes all taks from the given store and returns the number of
+// tasks deleted and an error, if any
+func (ts *TaskService) DeleteAll(storeID int) (int, error) {
+	var delIDs []int
+
+	rows, err := ts.DB.Query(`
+		DELETE FROM tasks
+		WHERE store_id = ($1)
+		RETURNING id`,
+		storeID)
+	if err != nil {
+		return 0, fmt.Errorf("delete all tasks: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+
+		err = rows.Scan(&id)
+		if err != nil {
+			return 0, fmt.Errorf("delete all tasks: %w", err)
+		}
+
+		delIDs = append(delIDs, id)
+	}
+	err = rows.Err()
+	if err != nil {
+		return 0, fmt.Errorf("delete all tasks: %w", err)
+	}
+
+	log.Println("All tasks deleted")
+	return len(delIDs), nil
 }

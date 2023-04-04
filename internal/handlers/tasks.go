@@ -92,3 +92,28 @@ func (t Tasks) DeleteByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (t Tasks) DeleAll(w http.ResponseWriter, r *http.Request) {
+	// gets a `map[string]string` associated with the http request `r`
+	reqData := mux.Vars(r)
+	storeID, err := strconv.Atoi(reqData["store_id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	n, err := t.TaskService.DeleteAll(storeID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type delIDs struct {
+		Num int `json:"del_id"`
+	}
+	num := delIDs{
+		Num: n,
+	}
+	utils.RenderJSON(w, num)
+
+}
