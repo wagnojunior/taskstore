@@ -5,10 +5,11 @@ import (
 	"net/http"
 
 	"github.com/wagnojunior/taskstore/internal/models"
+	"github.com/wagnojunior/taskstore/internal/repository/dbrepo"
 )
 
 type Store struct {
-	StoreService *models.StoreService
+	StoreService *dbrepo.PostgresRepo
 }
 
 func (s Store) Create(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func (s Store) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = s.StoreService.Create(store.Name)
+	_, err = s.StoreService.CreateStore(store.Name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

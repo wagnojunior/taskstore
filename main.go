@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/wagnojunior/taskstore/internal/handlers"
 	"github.com/wagnojunior/taskstore/internal/models"
+	"github.com/wagnojunior/taskstore/internal/repository/dbrepo"
 	"github.com/wagnojunior/taskstore/internal/taskstore"
 )
 
@@ -66,7 +67,7 @@ func main() {
 	defer db.Close()
 
 	// Creates the necessary services
-	storeService := &models.StoreService{
+	storeService := &dbrepo.PostgresRepo{
 		DB: db,
 	}
 	taskService := &models.TaskService{
