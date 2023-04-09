@@ -70,7 +70,7 @@ func main() {
 	storeService := &dbrepo.PostgresRepo{
 		DB: db,
 	}
-	taskService := &models.TaskService{
+	taskService := &dbrepo.PostgresRepo{
 		DB: db,
 	}
 
@@ -87,11 +87,14 @@ func main() {
 	r.StrictSlash(true)
 
 	r.HandleFunc("/store", storeHandler.Create).Methods(http.MethodPost)
+	r.HandleFunc("/delete/{store_id:[0-9]+}", storeHandler.DeleteByID).Methods(http.MethodGet)
+
 	r.HandleFunc("/task", taskHanler.Create).Methods(http.MethodPost)
 	r.HandleFunc("/task/{store_id:[0-9]+}/{id:[0-9]+}", taskHanler.GetByID).Methods(http.MethodGet)
+	r.HandleFunc("/task/{store_id:[0-9]+}/tags", taskHanler.GetByTags).Methods(http.MethodPost)
 	r.HandleFunc("/task/{store_id:[0-9]+}", taskHanler.GetAll).Methods(http.MethodGet)
 	r.HandleFunc("/delete/{store_id:[0-9]+}/{id:[0-9]+}", taskHanler.DeleteByID).Methods(http.MethodGet)
-	r.HandleFunc("/delete/{store_id:[0-9]+}", taskHanler.DeleAll).Methods(http.MethodGet)
+	r.HandleFunc("/delete/{store_id:[0-9]+}/all", taskHanler.DeleAll).Methods(http.MethodGet)
 
 	fmt.Println("Starting server at port :3030...")
 	log.Fatal(http.ListenAndServe("localhost:3030",
