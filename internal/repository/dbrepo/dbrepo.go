@@ -24,7 +24,6 @@ type PostgresConfig struct {
 // `String` returns the Postgres DB connection string.
 func (cfg PostgresConfig) String() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.SSLMode)
-
 }
 
 // `Open`` opens a SQL connection with the provided Postgres DB. Callers should
