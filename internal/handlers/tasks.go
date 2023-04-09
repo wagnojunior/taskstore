@@ -8,11 +8,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/wagnojunior/taskstore/internal/models"
+	"github.com/wagnojunior/taskstore/internal/repository"
 	"github.com/wagnojunior/taskstore/internal/utils"
 )
 
 type Tasks struct {
-	TaskService *models.TaskService
+	TaskService repository.DBRepo
 }
 
 // `Create` handles POST requests to create a task in a given store
@@ -26,7 +27,7 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTask, err := t.TaskService.Create(task.StoreID, task.Text, task.Tags,
+	newTask, err := t.TaskService.CreateTask(task.StoreID, task.Text, task.Tags,
 		task.Due)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,13 +48,41 @@ func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gotTask, err := t.TaskService.GetByID(storeID, id)
+	gotTask, err := t.TaskService.GetTaskByID(storeID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	utils.RenderJSON(w, gotTask)
+}
+
+func (t Tasks) GetByTags(w http.ResponseWriter, r *http.Request) {
+	var tags struct {
+		Tags []string `json:"tags"`
+	}
+	b, err := io.ReadAll(r.Body)
+	json.Unmarshal(b, &tags)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Gets a `map[string]string` associated with the http request `r`
+	reqData := mux.Vars(r)
+	storeID, err := strconv.Atoi(reqData["store_id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := t.TaskService.GetTaskByTags(storeID, tags.Tags)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.RenderJSON(w, tasks)
 }
 
 // `GetAll` handles GET requests to retrieve all tasks from a given store
@@ -66,7 +95,7 @@ func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allTasks, err := t.TaskService.GetAll(storeID)
+	allTasks, err := t.TaskService.GetAllTasks(storeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -75,9 +104,9 @@ func (t Tasks) GetAll(w http.ResponseWriter, r *http.Request) {
 	utils.RenderJSON(w, allTasks)
 }
 
-// `DeleteByID` handles POST requests to delete a task by ID from a given store
+// `DeleteByID` handles GET requests to delete a task by ID from a given store
 func (t Tasks) DeleteByID(w http.ResponseWriter, r *http.Request) {
-	// Gets a `map[string]string associated with the http request `r`
+	// Gets a `map[string]string` associated with the http request `r`
 	reqData := mux.Vars(r)
 	storeID, err := strconv.Atoi(reqData["store_id"])
 	id, err := strconv.Atoi(reqData["id"])
@@ -86,15 +115,16 @@ func (t Tasks) DeleteByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = t.TaskService.DeleteByID(storeID, id)
+	err = t.TaskService.DeleteTaskByID(storeID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
+// `DeleAll` handles GET requests to delete all tasks from a given store
 func (t Tasks) DeleAll(w http.ResponseWriter, r *http.Request) {
-	// gets a `map[string]string` associated with the http request `r`
+	// Gets a `map[string]string` associated with the http request `r`
 	reqData := mux.Vars(r)
 	storeID, err := strconv.Atoi(reqData["store_id"])
 	if err != nil {
@@ -102,7 +132,7 @@ func (t Tasks) DeleAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	n, err := t.TaskService.DeleteAll(storeID)
+	n, err := t.TaskService.DeleteAllTasks(storeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -115,5 +145,4 @@ func (t Tasks) DeleAll(w http.ResponseWriter, r *http.Request) {
 		Num: n,
 	}
 	utils.RenderJSON(w, num)
-
 }
