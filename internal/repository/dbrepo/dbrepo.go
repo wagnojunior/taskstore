@@ -6,6 +6,7 @@ import (
 	"log"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/pressly/goose/v3"
 )
 
 type PostgresRepo struct {
@@ -42,4 +43,19 @@ func Open(config PostgresConfig) (*sql.DB, error) {
 
 	log.Println("Connected to the database!")
 	return db, nil
+}
+
+// `Migrate` runs the goose migration to setup the database
+func Migrate(db *sql.DB, dir string) error {
+	err := goose.SetDialect("postgres")
+	if err != nil {
+		return fmt.Errorf("migrate: %w", err)
+	}
+
+	err = goose.Up(db, dir)
+	if err != nil {
+		return fmt.Errorf("migrate: %w", err)
+	}
+
+	return nil
 }
