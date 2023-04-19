@@ -26,6 +26,7 @@ func (pr *PostgresRepo) CreateStore(name string) (*models.Store, error) {
 		return nil, fmt.Errorf("create store: %w", err)
 	}
 
+	log.Println("Store created!")
 	return &store, nil
 }
 

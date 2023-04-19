@@ -66,6 +66,12 @@ func main() {
 	}
 	defer db.Close()
 
+	// Runs the goose database migration
+	err = dbrepo.Migrate(db, "internal/migrations")
+	if err != nil {
+		panic(err)
+	}
+
 	// Creates the necessary services
 	storeService := &dbrepo.PostgresRepo{
 		DB: db,
