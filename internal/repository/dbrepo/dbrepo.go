@@ -3,6 +3,7 @@ package dbrepo
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
 	"log"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -58,4 +59,16 @@ func Migrate(db *sql.DB, dir string) error {
 	}
 
 	return nil
+}
+
+// `MigrateFS` sets the base file system, runs the migration, and sets the file
+// system back to `nil`
+func MigrateFS(db *sql.DB, migrationFS fs.FS, dir string) error {
+	// Sets the file system and immediately sets it back to `nil`
+	goose.SetBaseFS(migrationFS)
+	defer func() {
+		goose.SetBaseFS(nil)
+	}()
+
+	return Migrate(db, dir)
 }

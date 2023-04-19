@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/wagnojunior/taskstore/internal/handlers"
+	"github.com/wagnojunior/taskstore/internal/migrations"
 	"github.com/wagnojunior/taskstore/internal/models"
 	"github.com/wagnojunior/taskstore/internal/repository/dbrepo"
 	"github.com/wagnojunior/taskstore/internal/taskstore"
@@ -67,7 +68,7 @@ func main() {
 	defer db.Close()
 
 	// Runs the goose database migration
-	err = dbrepo.Migrate(db, "internal/migrations")
+	err = dbrepo.MigrateFS(db, migrations.FS, ".")
 	if err != nil {
 		panic(err)
 	}
