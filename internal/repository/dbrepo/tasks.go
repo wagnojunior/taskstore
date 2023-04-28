@@ -66,6 +66,7 @@ func (pr *PostgresRepo) GetTaskByID(storeID, id int) (*models.Task, error) {
 	return &task, nil
 }
 
+// `GetTaskByTags` gets all tasks by tag from the given store
 func (pr *PostgresRepo) GetTaskByTags(storeID int, tags []string) (*[]models.Task, error) {
 	tasks := make([]models.Task, 0)
 	// `Task.Tags` is a slice of string, however it is saved as a
@@ -110,6 +111,13 @@ func (pr *PostgresRepo) GetTaskByTags(storeID int, tags []string) (*[]models.Tas
 
 	log.Println("All tasks retrieved!")
 	return &tasks, nil
+}
+
+// `GetTaskByDue` gets all tasks by due date from the given store
+func (pr *PostgresRepo) GetTaskByDue(storeID int, due string) (*[]models.Task, error) {
+	// TODO:
+
+	return nil, nil
 }
 
 // `GetAllTasks` gets all tasks from a determined store

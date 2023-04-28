@@ -37,7 +37,7 @@ func (t Tasks) Create(w http.ResponseWriter, r *http.Request) {
 	utils.RenderJSON(w, newTask)
 }
 
-// `GetByID` handles GET requests retrieve a task by ID from a given store
+// `GetByID` handles GET requests to retrieve a task by ID from a given store
 func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 	// Gets a `map[string]string` associated with the http resquest `r`
 	reqData := mux.Vars(r)
@@ -57,6 +57,8 @@ func (t Tasks) GetByID(w http.ResponseWriter, r *http.Request) {
 	utils.RenderJSON(w, gotTask)
 }
 
+// `GetByTags` handles the GET requests to retrieve tasks by tag from a given
+// store
 func (t Tasks) GetByTags(w http.ResponseWriter, r *http.Request) {
 	var tags struct {
 		Tags []string `json:"tags"`
@@ -83,6 +85,12 @@ func (t Tasks) GetByTags(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.RenderJSON(w, tasks)
+}
+
+// `GetByDue` handles the GET requests to retrieve tasks by due date from a
+// given store
+func (t Tasks) GetByDue(w http.ResponseWriter, r *http.Request) {
+	// TODO:
 }
 
 // `GetAll` handles GET requests to retrieve all tasks from a given store

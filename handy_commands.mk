@@ -6,7 +6,7 @@ curl -d '{"name":"store_1"}' -H 'Content-Type: application/json' http://localhos
 ## POST request to create a new task
 curl -d '{"store_id":1, "text":"test_task_1", "tags":["test_tag_1"], "due":"2021-02-18"}' -H 'Content-Type: application/json' http://localhost:3030/task
 
-## GET request to get tasks by tag
+## POST request to get tasks by tag
 curl -d '{"tags":["TEST", "lalala"]}' -H 'Content-Type: application/json' http://localhost:3030/task/4/tags
 
 ## POST request to delete a task
